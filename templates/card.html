@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        table { margin: 0 auto; border-collapse: collapse; }
+        td { width: 40px; height: 40px; border: 1px solid #ccc; text-align: center; }
+        .free { background-color: #ffd700; }
+        button { margin-top:20px; padding:10px 20px; }
+    </style>
+    <title>My Bingo Card</title>
+</head>
+<body>
+    <h1>Your Bingo Card</h1>
+    <div id="card-container"></div>
+    <button id="win-btn">I Won!</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Get card ID from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const cardId = urlParams.get('card');
+
+        if (!cardId) {
+            document.getElementById('card-container').innerText = 'No card specified.';
+            return;
+        }
+
+        // Fetch card data from the API
+        fetch(`/api/card/${cardId}`)
+            .then(response => response.json())
+            .then(cardGrid => {
+                renderCard(cardGrid);
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('card-container').innerText = 'Error loading card.';
+            });
+
+        function renderCard(grid) {
+            let html = '<table>';
+            for (let row of grid) {
+                html += '<tr>';
+                for (let cell of row) {
+                    let cellClass = (cell === 'FREE') ? 'free' : '';
+                    html += `<td class="${cellClass}">${cell}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            document.getElementById('card-container').innerHTML = html;
+        }
+
+        document.getElementById('win-btn').addEventListener('click', function() {
+            // Send win claim back to the bot via Telegram.WebApp
+            tg.sendData(JSON.stringify({
+                action: 'win',
+                cardId: cardId
+            }));
+            tg.close();
+        });
+    </script>
+</body>
+</html>
