@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        .card-item { padding: 10px; margin: 5px; border: 1px solid #ccc; cursor: pointer; }
+        .card-item:hover { background-color: #f0f0f0; }
+    </style>
+</head>
+<body>
+    <h1>Available Bingo Cards</h1>
+    <div id="cards-list"></div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const userId = tg.initDataUnsafe.user?.id;
+        if (!userId) {
+            document.body.innerHTML = "User not identified.";
+            return;
+        }
+
+        // Fetch available cards from the API
+        fetch('/api/cards/available')
+            .then(res => res.json())
+            .then(cards => {
+                const list = document.getElementById('cards-list');
+                cards.forEach(card => {
+                    const div = document.createElement('div');
+                    div.className = 'card-item';
+                    div.innerText = `Card ${card.id}`;
+                    div.onclick = () => buyCard(card.id);
+                    list.appendChild(div);
+                });
+            });
+
+        function buyCard(cardId) {
+            fetch('/api/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ telegram_id: userId, card_id: cardId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    tg.showAlert(`✅ ${data.message}`);
+                    // Optionally refresh the list
+                } else {
+                    tg.showAlert(`❌ ${data.message}`);
+                }
+            })
+            .catch(err => {
+                tg.showAlert('Error: ' + err);
+            });
+        }
+    </script>
+</body>
+</html>
