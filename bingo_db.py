@@ -25,7 +25,11 @@ if db_dir and not os.path.exists(db_dir):
         # Fallback to a local file in the current directory
         DB_PATH = "bingo.db"
         print(f"⚠️ Falling back to local database: {DB_PATH}")
-
+# Write a test file
+test_file = "/data/test_persistence.txt"
+with open(test_file, "w") as f:
+    f.write("This should persist.")
+print(f"✅ Test file written to {test_file}")
 # ========== 200 FIXED UNIQUE CARDS ==========
 ALL_CARDS = {
   1: [14,12,10,5,9, 17,27,29,20,28, 35,31,"FREE",43,44, 49,58,46,53,54, 65,67,75,72,68],
