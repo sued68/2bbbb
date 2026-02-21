@@ -89,6 +89,13 @@ async def view(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Click below to view your bingo card:", reply_markup=reply_markup)
 
+async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Open the web‑based shop to browse and buy cards."""
+    web_app_url = f"{WEB_APP_URL}shop"
+    keyboard = [[InlineKeyboardButton("🛒 Buy Cards", web_app=WebAppInfo(url=web_app_url))]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text("Click below to browse and buy cards:", reply_markup=reply_markup)
+
 async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = json.loads(update.effective_message.web_app_data.data)
     action = data.get('action')
@@ -193,7 +200,7 @@ async def admin_approve_deposit(update: Update, context: ContextTypes.DEFAULT_TY
     msg = approve_deposit(update.effective_user.id, payment_id)
     await update.message.reply_text(msg)
 
-# Similar for withdrawals (pending, approve, reject) – you can add them.
+# Similar for withdrawals (you can add them as needed)
 
 # ========== MAIN ==========
 def main():
@@ -206,6 +213,7 @@ def main():
     app.add_handler(CommandHandler("mycards", mycards))
     app.add_handler(CommandHandler("called", called))
     app.add_handler(CommandHandler("view", view))
+    app.add_handler(CommandHandler("shop", shop))               # New shop command
     app.add_handler(CommandHandler("deposit", deposit))
     app.add_handler(CommandHandler("withdraw", withdraw))
 
@@ -215,7 +223,7 @@ def main():
     app.add_handler(CommandHandler("stats", admin_stats))
     app.add_handler(CommandHandler("pendingdeposits", admin_pending_deposits))
     app.add_handler(CommandHandler("approvedeposit", admin_approve_deposit))
-    # Add similar for withdrawals
+    # Add similar for withdrawals if desired
 
     # Callbacks
     app.add_handler(CallbackQueryHandler(buy_callback, pattern="^buy_"))
